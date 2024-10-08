@@ -16,7 +16,6 @@
             <form id="add-task-form">
                 <label for="task-title">כותרת המשימה:</label>
                 <input type="text" id="task-title" required>
-
                 <label for="task-category">קטגוריה:</label>
                 <select id="task-category">
                     <option value="אסיפת קהילה">אסיפת קהילה</option>
@@ -24,14 +23,12 @@
                     <option value="להוריד מהראש">להוריד מהראש</option>
                     <option value="הורים">הורים</option>
                 </select>
-
                 <label for="task-priority">רמת דחיפות:</label>
                 <select id="task-priority">
                     <option value="אין לחץ">אין לחץ</option>
                     <option value="דחיפות בינונית">דחיפות בינונית</option>
                     <option value="גבוהה">גבוהה</option>
                 </select>
-
                 <button type="submit">הוסף משימה</button>
             </form>
         </section>
@@ -61,7 +58,6 @@
     appId: "1:782191325879:web:693263a6df08662e9cd332",
     measurementId: "G-72W044VJCP"
   };
-
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   const analytics = getAnalytics(app);
