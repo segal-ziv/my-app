@@ -16,35 +16,24 @@
             <form id="add-task-form">
                 <label for="task-title">כותרת המשימה:</label>
                 <input type="text" id="task-title" required>
-
                 <label for="task-category">קטגוריה:</label>
-                <select id="task-category" required>
-                    <option value="" disabled selected>בחר קטגוריה</option>
+                <select id="task-category">
                     <option value="אסיפת קהילה">אסיפת קהילה</option>
                     <option value="סופר">סופר</option>
                     <option value="להוריד מהראש">להוריד מהראש</option>
-                    <option value="יום פינוי פסולת מחזורית">יום פינוי פסולת מחזורית</option>
                     <option value="הורים">הורים</option>
                 </select>
-
                 <label for="task-owner">מי יצר את המשימה?</label>
-                <select id="task-owner" required>
-                    <option value="" disabled selected>בחר יוצר</option>
+                <select id="task-owner">
                     <option value="זיו">זיו</option>
                     <option value="ליאור">ליאור</option>
                 </select>
-
                 <label for="task-priority">רמת דחיפות:</label>
-                <select id="task-priority" required>
-                    <option value="" disabled selected>בחר רמת דחיפות</option>
+                <select id="task-priority">
                     <option value="אין לחץ">אין לחץ</option>
                     <option value="דחיפות בינונית">דחיפות בינונית</option>
-                    <option value="גבוהה מאוד">גבוהה מאוד</option>
+                    <option value="גבוהה">גבוהה</option>
                 </select>
-
-                <label for="task-due-date">תאריך יעד:</label>
-                <input type="date" id="task-due-date" required>
-
                 <button type="submit">הוסף משימה</button>
             </form>
         </section>
@@ -53,72 +42,98 @@
             <h2>רשימת משימות</h2>
             <ul id="tasks"></ul>
         </section>
+
+        <section id="task-stats">
+            <h2>סטטיסטיקות משימות</h2>
+            <div id="ziv-stats"></div>
+            <div id="lior-stats"></div>
+        </section>
     </main>
 
-    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js"></script>
-    <script>
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyAqRC9_eGOGDDzxjtWa3erg_A5r_OruVcU",
-            authDomain: "happylist-15e5c.firebaseapp.com",
-            projectId: "happylist-15e5c",
-            storageBucket: "happylist-15e5c.appspot.com",
-            messagingSenderId: "782191325879",
-            appId: "1:782191325879:web:693263a6df08662e9cd332",
-            measurementId: "G-72W044VJCP"
-        };
+    <script src="script.js"></script>
+    <script type="module">
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+      import { getFirestore, addDoc, collection, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+      
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_AUTH_DOMAIN",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_STORAGE_BUCKET",
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+        appId: "YOUR_APP_ID",
+        measurementId: "YOUR_MEASUREMENT_ID"
+      };
 
-        // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
 
-        // Load existing tasks
-        document.addEventListener('DOMContentLoaded', function () {
-            db.collection("tasks").get()
-                .then((querySnapshot) => {
-                    querySnapshot.forEach((doc) => {
-                        const task = doc.data();
-                        const taskItem = document.createElement('li');
-                        taskItem.textContent = `${task.title} - קטגוריה: ${task.category}, יוצר: ${task.owner}, דחיפות: ${task.priority}, תאריך יעד: ${task.dueDate}`;
-                        document.getElementById('tasks').appendChild(taskItem);
-                    });
-                })
-                .catch((error) => {
-                    console.error("שגיאה בשליפת המשימות: ", error);
-                });
+      document.addEventListener('DOMContentLoaded', function () {
+          // שליפת משימות קיימות מ-Firestore בעת טעינת הדף
+          const taskList = document.getElementById('tasks');
+          const zivStats = document.getElementById('ziv-stats');
+          const liorStats = document.getElementById('lior-stats');
 
-            // Task form submission
-            const taskForm = document.getElementById('add-task-form');
-            taskForm.addEventListener('submit', function (event) {
-                event.preventDefault();
+          getDocs(collection(db, "tasks"))
+              .then((querySnapshot) => {
+                  let zivTasks = 0, zivCompleted = 0;
+                  let liorTasks = 0, liorCompleted = 0;
+                  querySnapshot.forEach((doc) => {
+                      const task = doc.data();
+                      const taskItem = document.createElement('li');
+                      taskItem.textContent = `${task.title} - קטגוריה: ${task.category}, עדיפות: ${task.priority}, עבור: ${task.owner}`;
+                      taskList.appendChild(taskItem);
+                      
+                      // עדכון סטטיסטיקות
+                      if (task.owner === 'זיו') {
+                          zivTasks++;
+                          if (task.completed) zivCompleted++;
+                      } else if (task.owner === 'ליאור') {
+                          liorTasks++;
+                          if (task.completed) liorCompleted++;
+                      }
+                  });
+                  zivStats.textContent = `זיו: ${zivTasks} משימות פתוחות, ${zivCompleted} משימות שהושלמו`;
+                  liorStats.textContent = `ליאור: ${liorTasks} משימות פתוחות, ${liorCompleted} משימות שהושלמו`;
+              })
+              .catch((error) => {
+                  console.error("שגיאה בשליפת המשימות: ", error);
+              });
 
-                const title = document.getElementById('task-title').value;
-                const category = document.getElementById('task-category').value;
-                const owner = document.getElementById('task-owner').value;
-                const priority = document.getElementById('task-priority').value;
-                const dueDate = document.getElementById('task-due-date').value;
+          // הוספת מאזין לאירוע שליחת טופס
+          const taskForm = document.getElementById('add-task-form');
+          taskForm.addEventListener('submit', function (event) {
+              event.preventDefault(); // מונע את רענון הדף
 
-                db.collection("tasks").add({
-                    title: title,
-                    category: category,
-                    owner: owner,
-                    priority: priority,
-                    dueDate: dueDate
-                })
-                    .then(() => {
-                        console.log("המשימה נשמרה בהצלחה!");
-                        const taskItem = document.createElement('li');
-                        taskItem.textContent = `${title} - קטגוריה: ${category}, יוצר: ${owner}, דחיפות: ${priority}, תאריך יעד: ${dueDate}`;
-                        document.getElementById('tasks').appendChild(taskItem);
-                    })
-                    .catch((error) => {
-                        console.error("שגיאה בשמירת המשימה: ", error);
-                    });
+              // קבלת פרטי המשימה
+              const title = document.getElementById('task-title').value;
+              const category = document.getElementById('task-category').value;
+              const priority = document.getElementById('task-priority').value;
+              const owner = document.getElementById('task-owner').value;
 
-                taskForm.reset();
-            });
-        });
+              // שמירה ב-Firestore
+              addDoc(collection(db, "tasks"), {
+                  title: title,
+                  category: category,
+                  priority: priority,
+                  owner: owner,
+                  completed: false
+              })
+                  .then(() => {
+                      console.log("המשימה נשמרה בהצלחה!");
+                      location.reload(); // רענון הדף כדי להציג את המשימות המעודכנות
+                  })
+                  .catch((error) => {
+                      console.error("שגיאה בשמירת המשימה: ", error);
+                  });
+
+              // איפוס הטופס
+              taskForm.reset();
+          });
+      });
     </script>
 </body>
 </html>
