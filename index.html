@@ -2,13 +2,45 @@
 <html lang="he">
 <head>
     <meta charset="UTF-8">
-    <title>האפליקציה שלנו</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- מאפשר הוספה למסך הבית באייפון -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>ניהול משימות - Happy List</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>ברוכים הבאים לאפליקציה שלנו!</h1>
-    <p>זהו דף התחלתי, נוכל להוסיף עוד תוכן בהמשך.</p>
+    <header>
+        <h1>Happy List - ניהול משימות משותף</h1>
+    </header>
+    <main>
+        <section id="task-form">
+            <h2>הוספת משימה חדשה</h2>
+            <form id="add-task-form">
+                <label for="task-title">כותרת המשימה:</label>
+                <input type="text" id="task-title" required>
+
+                <label for="task-category">קטגוריה:</label>
+                <select id="task-category">
+                    <option value="אסיפת קהילה">אסיפת קהילה</option>
+                    <option value="סופר">סופר</option>
+                    <option value="להוריד מהראש">להוריד מהראש</option>
+                    <option value="הורים">הורים</option>
+                </select>
+
+                <label for="task-priority">רמת דחיפות:</label>
+                <select id="task-priority">
+                    <option value="אין לחץ">אין לחץ</option>
+                    <option value="דחיפות בינונית">דחיפות בינונית</option>
+                    <option value="גבוהה">גבוהה</option>
+                </select>
+
+                <button type="submit">הוסף משימה</button>
+            </form>
+        </section>
+
+        <section id="task-list">
+            <h2>רשימת משימות</h2>
+            <ul id="tasks"></ul>
+        </section>
+    </main>
+    <script src="script.js"></script>
 </body>
 </html>
