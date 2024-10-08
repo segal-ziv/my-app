@@ -93,47 +93,4 @@
                           if (task.completed) zivCompleted++;
                       } else if (task.owner === 'ליאור') {
                           liorTasks++;
-                          if (task.completed) liorCompleted++;
-                      }
-                  });
-                  zivStats.textContent = `זיו: ${zivTasks} משימות פתוחות, ${zivCompleted} משימות שהושלמו`;
-                  liorStats.textContent = `ליאור: ${liorTasks} משימות פתוחות, ${liorCompleted} משימות שהושלמו`;
-              })
-              .catch((error) => {
-                  console.error("שגיאה בשליפת המשימות: ", error);
-              });
-
-          // הוספת מאזין לאירוע שליחת טופס
-          const taskForm = document.getElementById('add-task-form');
-          taskForm.addEventListener('submit', function (event) {
-              event.preventDefault(); // מונע את רענון הדף
-
-              // קבלת פרטי המשימה
-              const title = document.getElementById('task-title').value;
-              const category = document.getElementById('task-category').value;
-              const priority = document.getElementById('task-priority').value;
-              const owner = document.getElementById('task-owner').value;
-
-              // שמירה ב-Firestore
-              addDoc(collection(db, "tasks"), {
-                  title: title,
-                  category: category,
-                  priority: priority,
-                  owner: owner,
-                  completed: false
-              })
-                  .then(() => {
-                      console.log("המשימה נשמרה בהצלחה!");
-                      location.reload(); // רענון הדף כדי להציג את המשימות המעודכנות
-                  })
-                  .catch((error) => {
-                      console.error("שגיאה בשמירת המשימה: ", error);
-                  });
-
-              // איפוס הטופס
-              taskForm.reset();
-          });
-      });
-    </script>
-</body>
-</html>
+                          if (task.completed
