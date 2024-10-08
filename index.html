@@ -1,11 +1,84 @@
 <!DOCTYPE html>
 <html lang="he">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ניהול משימות - Happy List</title>
     <link rel="stylesheet" href="style.css">
+    <script type="module" defer>
+        // טעינת Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+
+        // הגדרת Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAqRC9_eGOGDDzxjtWa3erg_A5r_OruVcU",
+            authDomain: "happylist-15e5c.firebaseapp.com",
+            projectId: "happylist-15e5c",
+            storageBucket: "happylist-15e5c.appspot.com",
+            messagingSenderId: "782191325879",
+            appId: "1:782191325879:web:693263a6df08662e9cd332",
+            measurementId: "G-72W044VJCP"
+        };
+
+        // טעינת Firebase והגדרת Firestore
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // מאזין לאירוע DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', function () {
+            // יצירת קישורים לטופס והמשימות
+            const taskForm = document.getElementById('add-task-form');
+            const taskList = document.getElementById('tasks');
+
+            // שליפת משימות קיימות מ-Firestore בעת טעינת הדף
+            getDocs(collection(db, "tasks"))
+                .then((querySnapshot) => {
+                    querySnapshot.forEach((doc) => {
+                        const task = doc.data();
+                        const taskItem = document.createElement('li');
+                        taskItem.textContent = `${task.title} - קטגוריה: ${task.category}, עדיפות: ${task.priority}`;
+                        taskList.appendChild(taskItem);
+                    });
+                })
+                .catch((error) => {
+                    console.error("שגיאה בשליפת המשימות: ", error);
+                });
+
+            // מאזין לאירוע שליחת טופס
+            taskForm.addEventListener('submit', function (event) {
+                event.preventDefault(); // מונע את הרענון הדף
+
+                // קבלת פרטי המשימה
+                const title = document.getElementById('task-title').value;
+                const category = document.getElementById('task-category').value;
+                const priority = document.getElementById('task-priority').value;
+
+                // שמירה ב-Firestore
+                addDoc(collection(db, "tasks"), {
+                    title: title,
+                    category: category,
+                    priority: priority
+                })
+                    .then(() => {
+                        console.log("המשימה נשמרה בהצלחה!");
+                        // יצירת אלמנט חדש למשימה
+                        const taskItem = document.createElement('li');
+                        taskItem.textContent = `${title} - קטגוריה: ${category}, עדיפות: ${priority}`;
+                        taskList.appendChild(taskItem);
+                    })
+                    .catch((error) => {
+                        console.error("שגיאה בשמירת המשימה: ", error);
+                    });
+
+                // איפוס הטופס
+                taskForm.reset();
+            });
+        });
+    </script>
 </head>
+
 <body>
     <header>
         <h1>Happy List - ניהול משימות משותף</h1>
@@ -38,30 +111,6 @@
             <ul id="tasks"></ul>
         </section>
     </main>
-
-    <!-- כאן הקוד של Firebase שהוכנס ישירות -->
-    <script type="module">
-      // Import the functions you need from the SDKs you need
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-      import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-analytics.js";
-
-      // Your web app's Firebase configuration
-      const firebaseConfig = {
-        apiKey: "AIzaSyAqRC9_eGOGDDzxjtWa3erg_A5r_OruVcU",
-        authDomain: "happylist-15e5c.firebaseapp.com",
-        projectId: "happylist-15e5c",
-        storageBucket: "happylist-15e5c.appspot.com",
-        messagingSenderId: "782191325879",
-        appId: "1:782191325879:web:693263a6df08662e9cd332",
-        measurementId: "G-72W044VJCP"
-      };
-
-      // Initialize Firebase
-      const app = initializeApp(firebaseConfig);
-      const analytics = getAnalytics(app);
-    </script>
-
-    <!-- יש לייבא את הקובץ script.js אחרי הייבוא של Firebase -->
-    <script src="script.js"></script>
 </body>
+
 </html>
