@@ -34,6 +34,8 @@
                     <option value="דחיפות בינונית">דחיפות בינונית</option>
                     <option value="גבוהה">גבוהה</option>
                 </select>
+                <label for="notifications">האם ברצונך לקבל התראות על משימות חדשות?</label>
+                <input type="checkbox" id="notifications">
                 <button type="submit">הוסף משימה</button>
             </form>
         </section>
@@ -93,4 +95,68 @@
                           if (task.completed) zivCompleted++;
                       } else if (task.owner === 'ליאור') {
                           liorTasks++;
-                          if (task.completed
+                          if (task.completed) liorCompleted++;
+                      }
+                  });
+                  zivStats.textContent = `זיו: ${zivTasks} משימות פתוחות, ${zivCompleted} משימות שהושלמו`;
+                  liorStats.textContent = `ליאור: ${liorTasks} משימות פתוחות, ${liorCompleted} משימות שהושלמו`;
+              })
+              .catch((error) => {
+                  console.error("שגיאה בשליפת המשימות: ", error);
+              });
+
+          // הוספת מאזין לאירוע שליחת טופס
+          const taskForm = document.getElementById('add-task-form');
+          taskForm.addEventListener('submit', function (event) {
+              event.preventDefault(); // מונע את רענון הדף
+
+              // קבלת פרטי המשימה
+              const title = document.getElementById('task-title').value;
+              const category = document.getElementById('task-category').value;
+              const priority = document.getElementById('task-priority').value;
+              const owner = document.getElementById('task-owner').value;
+              const notifications = document.getElementById('notifications').checked;
+
+              // שמירה ב-Firestore
+              addDoc(collection(db, "tasks"), {
+                  title: title,
+                  category: category,
+                  priority: priority,
+                  owner: owner,
+                  completed: false
+              })
+                  .then(() => {
+                      console.log("המשימה נשמרה בהצלחה!");
+                      if (notifications) {
+                          notifyUser(owner, title);
+                      }
+                      location.reload(); // רענון הדף כדי להציג את המשימות המעודכנות
+                  })
+                  .catch((error) => {
+                      console.error("שגיאה בשמירת המשימה: ", error);
+                  });
+
+              // איפוס הטופס
+              taskForm.reset();
+          });
+
+          // פונקציה לשליחת התראה למשתמש
+          function notifyUser(owner, taskTitle) {
+              if (Notification.permission === 'granted') {
+                  new Notification(`משימה חדשה נוצרה עבור ${owner}`, {
+                      body: `כותרת: ${taskTitle}`
+                  });
+              } else if (Notification.permission !== 'denied') {
+                  Notification.requestPermission().then(permission => {
+                      if (permission === 'granted') {
+                          new Notification(`משימה חדשה נוצרה עבור ${owner}`, {
+                              body: `כותרת: ${taskTitle}`
+                          });
+                      }
+                  });
+              }
+          }
+      });
+    </script>
+</body>
+</html>
